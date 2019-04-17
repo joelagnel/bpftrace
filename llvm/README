@@ -1,0 +1,10 @@
+LLVM and Clang sources.
+github: https://github.com/llvm/llvm-project
+
+Default version: v7.0.1
+Latest stable release.
+
+Building:
+LLVM uses cmake and builds without major surprises. The only twist is that we
+need host versions of llvm-tblgen and clang-tblgen which are not part of llvm
+distribution so we need to build them on our own.

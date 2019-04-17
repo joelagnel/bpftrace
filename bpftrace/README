@@ -1,0 +1,16 @@
+bpftrace
+High-level tracing language for Linux eBPF
+github: https://github.com/iovisor/bpftrace
+
+Default version: https://github.com/michalgr/bpftrace/tree/compile-for-android
+
+Building:
+- bpftrace depends on bcc and needs to be told where to look for headers
+  (cmake's -DLIBBCC_INCLUDE_DIRS)
+- Android's libc (bionic) has pthreads built-in, there is no need to tell
+  linker to do anything when building program using pthreads (in fact
+  specifying -lpthreads breaks linking phase as there is no such library).
+  For that reasone we set THREADS_PTHREAD_ARG to an empty string
+- we need to tell cmake to use flex version that matches the lib and
+  headers we have for Android. We set FLEX_EXECUTABLE to point to
+  host executable built from the same sources as we use for Android.

@@ -1,0 +1,20 @@
+# -*- mode: gitignore; -*-
+
+# editors' temp files
+*~
+\#*\#
+.\#*
+
+# standalone toolchain
+toolchain/
+
+# python compiled files
+*.pyc
+
+# build files
+build/
+out/
+/bpftools-*
+
+# sources
+/*/sources
