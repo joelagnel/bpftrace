@@ -16,6 +16,8 @@ Makefiles in this branch make use of the following tools on the build machine:
 - gnu tar
 - bison
 
+To run bpftrace and bcc you'll also need a device running Linux kernel providing required functionality (see "Linux Kernel Requirements" section [here](https://github.com/iovisor/bpftrace/blob/master/INSTALL.md#linux-kernel-requirements)). In case of arm64 it's great if the device runs kernel version 4.10+ ([that's when uprobe support for arm64 was landed](https://github.com/torvalds/linux/commit/9842ceae9fa8deae141533d52a6ead7666962c09)).
+
 ## Usage
 The following builds and copies a sysroot directory containing bpftrace, bcc, python and their dependencies to your android device under `/data/local/tmp/bpftools-0.0.1`:
 
@@ -38,6 +40,14 @@ If you intend to peek at kernel data structures you'll need to make kernel heade
 export ARCH=arm64
 export BPFTRACE_KERNEL_SOURCE=<path to kernel headers>
 ```
+
+## Getting bpftrace to work on Google Pixel2
+In order to use bpftrace on Google Pixel2 you need to install system image allowing for root access and running kernel supporting bpf instrumentation. Default kernels included in AOSP repos won't do as Pixel2 uses kernel 4.4. I created a fork of kernel 4.4 supporting kprobe and tracepoint providers (TODO: uprobe) and you can use it with Pixel2 images based on `android-9.0.0_r35`. You can find it [here](https://github.com/michalgr/kernel_msm/tree/basic_bpf_tracing_pixel2).
+
+A handful of links that might be usefull when getting Pixel2 ready:
+- [it might be quite difficult to get a Pixel2 phone with unlockable bootloader](https://forum.xda-developers.com/pixel-2/help/oem-unlocking-grayed-vzw-pixel-2-t3776763), perhaps XL variant is easier to get
+- [instructions for building AOSP](https://source.android.com/setup/build/requirements)
+- [instructions for building Kernel for Android](https://source.android.com/setup/build/building-kernels)
 
 ## Included projects
 Makefiles included in this branch fetch sources of and cross compile following projects:
