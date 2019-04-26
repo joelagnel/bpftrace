@@ -36,18 +36,13 @@ $(SYSROOT_NAME): scripts python bcc bpftrace $(ANDROID_OUT_DIR)/lib/libc++_share
 
 	cp $(ANDROID_OUT_DIR)/lib/libc++_shared.so $@/lib/
 
-	cp $(ANDROID_OUT_DIR)/lib/libelf-0.176.so $@/lib/
-	cp -P $(ANDROID_OUT_DIR)/lib/libelf.so $@/lib/
-	cp -P $(ANDROID_OUT_DIR)/lib/libelf.so.1 $@/lib/
+	cp $(ANDROID_OUT_DIR)/lib/libelf* $@/lib/
+	cp $(ANDROID_OUT_DIR)/lib/libfl* $@/lib/
 
-	cp $(ANDROID_OUT_DIR)/lib/libfl.so.2.0.0 $@/lib/
-	cp -P $(ANDROID_OUT_DIR)/lib/libfl.so.2 $@/lib/
-	cp -P $(ANDROID_OUT_DIR)/lib/libfl.so $@/lib/
-
-	cp -Pr $(ANDROID_OUT_DIR)/lib/python3.6 $@/lib/
+	cp -a $(ANDROID_OUT_DIR)/lib/python3.6 $@/lib/
 
 	mkdir -p $@/share
-	cp -Pr $(ANDROID_OUT_DIR)/share/bcc $@/share/
+	cp -a $(ANDROID_OUT_DIR)/share/bcc $@/share/
 
 	cp -r $(ANDROID_OUT_DIR)/*.sh $@/
 
