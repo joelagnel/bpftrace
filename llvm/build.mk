@@ -1,4 +1,3 @@
-$(ALL_PROJECTS_TARGET): llvm
 llvm: $(ANDROID_BUILD_DIR)/llvm.done
 fetch-sources: llvm/sources
 remove-sources: remove-llvm-sources

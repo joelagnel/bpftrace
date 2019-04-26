@@ -14,25 +14,50 @@ HOST_OUT_DIR = $(OUT_DIR)/host
 BASE_NAME = bpftools
 VERSION ?= 0.0.1
 FULL_NAME = $(BASE_NAME)-$(VERSION)
-ARCHIVE_NAME = $(FULL_NAME).tar.gz
-ALL_PROJECTS_TARGET = $(FULL_NAME)
+SYSROOT_NAME = $(FULL_NAME)
+ARCHIVE_NAME = $(SYSROOT_NAME).tar.gz
 
 all: $(ARCHIVE_NAME)
 
 include toolchain.mk
 
-$(ARCHIVE_NAME): $(FULL_NAME)
-	$(TAR) -zcf $@ $(ANDROID_OUT_DIR) --transform="s|$(ANDROID_OUT_DIR)|$(FULL_NAME)|" --owner=0 --group=0
+# minimal subset of ANDROID_OUT_DIR allowing us to execute bcc, python and
+# bpftrace
+$(SYSROOT_NAME): scripts python bcc bpftrace $(ANDROID_OUT_DIR)/lib/libc++_shared.so
+	mkdir -p $@/bin
+	cp $(ANDROID_OUT_DIR)/bin/bpftrace $@/bin/
+	cp -P $(ANDROID_OUT_DIR)/bin/python* $@/bin/
 
-$(FULL_NAME): $(PROJECTS) $(ANDROID_OUT_DIR)/lib/libc++_shared.so
-	ln -s $(abspath $(ANDROID_OUT_DIR)) $@
+	mkdir -p $@/lib
+	cp $(ANDROID_OUT_DIR)/lib/libbcc.so $@/lib/
+	cp $(ANDROID_OUT_DIR)/lib/libbpf.so $@/lib/
 
-bpftools: $(FULL_NAME)
+	cp $(ANDROID_OUT_DIR)/lib/libclang.so $@/lib/
+
+	cp $(ANDROID_OUT_DIR)/lib/libc++_shared.so $@/lib/
+
+	cp $(ANDROID_OUT_DIR)/lib/libelf-0.176.so $@/lib/
+	cp -P $(ANDROID_OUT_DIR)/lib/libelf.so $@/lib/
+	cp -P $(ANDROID_OUT_DIR)/lib/libelf.so.1 $@/lib/
+
+	cp $(ANDROID_OUT_DIR)/lib/libfl.so.2.0.0 $@/lib/
+	cp -P $(ANDROID_OUT_DIR)/lib/libfl.so.2 $@/lib/
+	cp -P $(ANDROID_OUT_DIR)/lib/libfl.so $@/lib/
+
+	cp -Pr $(ANDROID_OUT_DIR)/lib/python3.6 $@/lib/
+
+	mkdir -p $@/share
+	cp -Pr $(ANDROID_OUT_DIR)/share/bcc $@/share/
+
+	cp -r $(ANDROID_OUT_DIR)/*.sh $@/
+
+$(ARCHIVE_NAME): $(SYSROOT_NAME)
+	$(TAR) -zcf $@ $(SYSROOT_NAME) --owner=0 --group=0
 
 $(ANDROID_BUILD_DIR) $(HOST_BUILD_DIR) $(DOWNLOADS_DIR):
 	mkdir -p $@
 
- $(ANDROID_OUT_DIR) $(HOST_OUT_DIR):
+$(ANDROID_OUT_DIR) $(HOST_OUT_DIR):
 	mkdir -p $@
 	mkdir $@/bin
 	mkdir $@/include
@@ -46,20 +71,20 @@ $(ANDROID_OUT_DIR)/lib/libc++_shared.so: $(ANDROID_TOOLCHAIN_DIR) | $(ANDROID_OU
 install: $(ARCHIVE_NAME)
 	adb push $(ARCHIVE_NAME) /data/local/tmp
 	adb shell "cd /data/local/tmp && tar xf $(ARCHIVE_NAME)"
-	adb shell "/data/local/tmp/$(FULL_NAME)/setup.sh"
+	adb shell "/data/local/tmp/$(SYSROOT_NAME)/setup.sh"
 	adb shell "rm /data/local/tmp/$(ARCHIVE_NAME)"
 	@echo "Done ! run adb shell and evaluate setup.sh in current shell to set up environment"
-	@echo ". /data/local/tmp/$(FULL_NAME)/setup.sh"
+	@echo ". /data/local/tmp/$(SYSROOT_NAME)/setup.sh"
 
 uninstall:
-	adb shell "rm -rf /data/local/tmp/$(FULL_NAME)"
+	adb shell "rm -rf /data/local/tmp/$(SYSROOT_NAME)"
 
 clean:
 	-rm -fr $(BUILD_DIR)
 	-rm -fr $(OUT_DIR)
 	-rm -fr $(ANDROID_TOOLCHAIN_DIR)
 	-rm $(ARCHIVE_NAME)
-	-rm $(FULL_NAME)
+	-rm -fr $(SYSROOT_NAME)
 
 .PHONY: clean fetch-sources remove-sources install uninstall
 .DELETE_ON_ERROR:

@@ -1,4 +1,3 @@
-$(ALL_PROJECTS_TARGET): argp
 argp: $(ANDROID_BUILD_DIR)/argp.done
 fetch-sources: argp/sources
 remove-sources: remove-argp-sources

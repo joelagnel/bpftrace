@@ -1,4 +1,3 @@
-$(ALL_PROJECTS_TARGET): flex
 flex: $(ANDROID_BUILD_DIR)/flex.done
 flex-host: $(HOST_OUT_DIR)/bin/flex
 fetch-sources: flex/sources

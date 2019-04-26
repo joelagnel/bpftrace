@@ -1,4 +1,3 @@
-$(ALL_PROJECTS_TARGET): elfutils
 elfutils: $(ANDROID_BUILD_DIR)/elfutils.done
 fetch-sources: elfutils/sources
 remove-sources: remove-elfutils-sources

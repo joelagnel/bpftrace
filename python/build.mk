@@ -1,4 +1,3 @@
-$(ALL_PROJECTS_TARGET): python
 python: $(ANDROID_BUILD_DIR)/python.done
 fetch-sources: python/sources
 remove-sources: remove-python-sources

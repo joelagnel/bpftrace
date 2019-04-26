@@ -1,4 +1,3 @@
-$(ALL_PROJECTS_TARGET): bcc
 bcc: $(ANDROID_BUILD_DIR)/bcc.done
 fetch-sources: bcc/sources
 remove-sources: remove-bcc-sources

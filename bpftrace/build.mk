@@ -1,4 +1,3 @@
-$(ALL_PROJECTS_TARGET): bpftrace
 bpftrace: $(ANDROID_OUT_DIR)/bin/bpftrace
 fetch-sources: bpftrace/sources
 remove-sources: remove-bpftrace-sources
