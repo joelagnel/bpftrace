@@ -16,7 +16,7 @@ LLVM_EXTRA_CMAKE_FLAGS = -DLLVM_ENABLE_PROJECTS=clang -DCMAKE_BUILD_TYPE=Release
 # llvm.done empty file instead of all the installed llvm/clang binaries to keep
 # track of whether the rules need to be rerun (for simiplicity)
 $(ANDROID_BUILD_DIR)/llvm.done: $(ANDROID_BUILD_DIR)/llvm | $(ANDROID_OUT_DIR)
-	cd $(ANDROID_BUILD_DIR)/llvm && $(MAKE) install -j $(THREADS)
+	cd $(ANDROID_BUILD_DIR)/llvm && $(MAKE) install/strip -j $(THREADS)
 	touch $@
 
 # generates llvm build files for Android
