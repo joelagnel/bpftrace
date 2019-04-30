@@ -30,7 +30,6 @@ $(SYSROOT_NAME): scripts python bcc bpftrace $(ANDROID_OUT_DIR)/lib/libc++_share
 
 	mkdir -p $@/lib
 	cp $(ANDROID_OUT_DIR)/lib/libbcc.so $@/lib/
-	cp $(ANDROID_OUT_DIR)/lib/libbpf.so $@/lib/
 
 	cp $(ANDROID_OUT_DIR)/lib/libclang.so $@/lib/
 
