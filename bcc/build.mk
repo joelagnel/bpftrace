@@ -21,7 +21,7 @@ BCC_EXTRA_CFLAGS += "-include$(abspath bcc/android_fixups/dl_fixups.h)"
 
 # builds and installs bcc for Android.
 $(ANDROID_BUILD_DIR)/bcc.done: $(ANDROID_BUILD_DIR)/bcc
-	cd $(ANDROID_BUILD_DIR)/bcc && $(MAKE) install -j $(THREADS)
+	cd $(ANDROID_BUILD_DIR)/bcc && $(MAKE) install/strip -j $(THREADS)
 	touch $@
 
 # generates bcc build files for Android
