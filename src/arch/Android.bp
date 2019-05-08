@@ -1,0 +1,12 @@
+cc_library_static {
+    name: "bpftrace_arch",
+    defaults: ["bpftrace_defaults"],
+    target: {
+        android_x86_64: {
+            srcs: ["x86_64.cpp"],
+        },
+        android_arm64: {
+            srcs: ["aarch64.cpp"],
+        }
+    },
+}

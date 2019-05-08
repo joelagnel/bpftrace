@@ -1,0 +1,8 @@
+cc_library_static {
+    name: "bpftrace_ast",
+    defaults: ["bpftrace_defaults"],
+    srcs: ["*.cpp"],
+    static_libs: [
+        "bpftrace_parser",
+    ],
+}
