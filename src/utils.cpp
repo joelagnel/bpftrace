@@ -227,6 +227,8 @@ std::vector<std::string> get_kernel_cflags(
     arch = "x86";
   } else if (uname_machine[0] == 'i' && !strncmp(&uname_machine[2], "86", 2)) {
     arch = "x86";
+  } else if (!strncmp(uname_machine, "armv8", 5)) {
+    arch = "arm64";
   } else if (!strncmp(uname_machine, "arm", 3)) {
     arch = "arm";
   } else if (!strncmp(uname_machine, "sa110", 5)) {
