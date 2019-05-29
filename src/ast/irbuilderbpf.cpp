@@ -16,7 +16,8 @@ IRBuilderBPF::IRBuilderBPF(LLVMContext &context,
                            BPFtrace &bpftrace)
   : IRBuilder<>(context),
     module_(module),
-    bpftrace_(bpftrace)
+    bpftrace_(bpftrace),
+    bpf_map_type_(nullptr)
 {
   // Declare external LLVM function
   FunctionType *pseudo_func_type = FunctionType::get(
@@ -133,13 +134,14 @@ llvm::Type *IRBuilderBPF::GetType(const SizedType &stype)
   return ty;
 }
 
-CallInst *IRBuilderBPF::CreateBpfPseudoCall(int mapfd)
+Value *IRBuilderBPF::CreateBpfPseudoCall(int mapfd)
 {
   Function *pseudo_func = module_.getFunction("llvm.bpf.pseudo");
-  return CreateCall(pseudo_func, {getInt64(BPF_PSEUDO_MAP_FD), getInt64(mapfd)}, "pseudo");
+  CallInst *call = CreateCall(pseudo_func, {getInt64(BPF_PSEUDO_MAP_FD), getInt64(mapfd)}, "pseudo");
+  return CreateIntToPtr(call, GetBpfMapPtrTy(), "bpf_map_ptr");
 }
 
-CallInst *IRBuilderBPF::CreateBpfPseudoCall(Map &map)
+Value *IRBuilderBPF::CreateBpfPseudoCall(Map &map)
 {
   int mapfd = bpftrace_.maps_[map.ident]->mapfd_;
   return CreateBpfPseudoCall(mapfd);
@@ -154,7 +156,7 @@ CallInst *IRBuilderBPF::CreateGetJoinMap(Value *ctx __attribute__((unused)))
 
   FunctionType *lookup_func_type = FunctionType::get(
       getInt8PtrTy(),
-      {getInt8PtrTy(), getInt8PtrTy()},
+      {GetBpfMapPtrTy(), getInt8PtrTy()},
       false);
   PointerType *lookup_func_ptr_type = PointerType::get(lookup_func_type, 0);
   Constant *lookup_func = ConstantExpr::getCast(
@@ -173,7 +175,7 @@ Value *IRBuilderBPF::CreateMapLookupElem(Map &map, AllocaInst *key)
   // Return: Map value or NULL
   FunctionType *lookup_func_type = FunctionType::get(
       getInt8PtrTy(),
-      {getInt8PtrTy(), getInt8PtrTy()},
+      {GetBpfMapPtrTy(), getInt8PtrTy()},
       false);
   PointerType *lookup_func_ptr_type = PointerType::get(lookup_func_type, 0);
   Constant *lookup_func = ConstantExpr::getCast(
@@ -225,7 +227,7 @@ void IRBuilderBPF::CreateMapUpdateElem(Map &map, AllocaInst *key, Value *val)
   // Return: 0 on success or negative error
   FunctionType *update_func_type = FunctionType::get(
       getInt64Ty(),
-      {getInt8PtrTy(), getInt8PtrTy(), getInt8PtrTy(), getInt64Ty()},
+      {GetBpfMapPtrTy(), getInt8PtrTy(), getInt8PtrTy(), getInt64Ty()},
       false);
   PointerType *update_func_ptr_type = PointerType::get(update_func_type, 0);
   Constant *update_func = ConstantExpr::getCast(
@@ -243,7 +245,7 @@ void IRBuilderBPF::CreateMapDeleteElem(Map &map, AllocaInst *key)
   // Return: 0 on success or negative error
   FunctionType *delete_func_type = FunctionType::get(
       getInt64Ty(),
-      {getInt8PtrTy(), getInt8PtrTy()},
+      {GetBpfMapPtrTy(), getInt8PtrTy()},
       false);
   PointerType *delete_func_ptr_type = PointerType::get(delete_func_type, 0);
   Constant *delete_func = ConstantExpr::getCast(
@@ -585,7 +587,7 @@ CallInst *IRBuilderBPF::CreateGetStackId(Value *ctx, bool ustack, StackType stac
   // Return: >= 0 stackid on success or negative error
   FunctionType *getstackid_func_type = FunctionType::get(
       getInt64Ty(),
-      {getInt8PtrTy(), getInt8PtrTy(), getInt64Ty()},
+      {getInt8PtrTy(), GetBpfMapPtrTy(), getInt64Ty()},
       false);
   PointerType *getstackid_func_ptr_type = PointerType::get(getstackid_func_type, 0);
   Constant *getstackid_func = ConstantExpr::getCast(
@@ -623,7 +625,7 @@ void IRBuilderBPF::CreatePerfEventOutput(Value *ctx, Value *data, size_t size)
       getInt64Ty(),
       {
         getInt8PtrTy(),
-        getInt64Ty(),
+        GetBpfMapPtrTy(),
         getInt64Ty(),
         cast<PointerType>(data->getType()),
         getInt64Ty()
@@ -637,5 +639,13 @@ void IRBuilderBPF::CreatePerfEventOutput(Value *ctx, Value *data, size_t size)
   CreateCall(perfoutput_func, {ctx, map_ptr, flags_val, data, size_val}, "perf_event_output");
 }
 
+
+llvm::Type *IRBuilderBPF::GetBpfMapPtrTy()
+{
+  if (!bpf_map_type_) {
+    bpf_map_type_ = StructType::create(module_.getContext(), "bpf_map");
+  }
+  return PointerType::get(bpf_map_type_, 0);
+}
 } // namespace ast
 } // namespace bpftrace

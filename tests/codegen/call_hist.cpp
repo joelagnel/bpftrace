@@ -8,7 +8,9 @@ TEST(codegen, call_hist)
 {
   test("kprobe:f { @x = hist(pid) }",
 
-R"EXPECTED(; Function Attrs: nounwind
+R"EXPECTED(%bpf_map = type opaque
+
+; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
 
 ; Function Attrs: argmemonly nounwind
@@ -50,12 +52,13 @@ hist.is_not_zero.i:                               ; preds = %entry
   br label %log2.exit
 
 log2.exit:                                        ; preds = %entry, %hist.is_not_zero.i
-  %log22 = phi i64 [ %25, %hist.is_not_zero.i ], [ 1, %entry ]
+  %log23 = phi i64 [ %25, %hist.is_not_zero.i ], [ 1, %entry ]
   %26 = bitcast i64* %"@x_key" to i8*
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %26)
-  store i64 %log22, i64* %"@x_key", align 8
+  store i64 %log23, i64* %"@x_key", align 8
   %pseudo = tail call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %lookup_elem = call i8* inttoptr (i64 1 to i8* (i8*, i8*)*)(i64 %pseudo, i64* nonnull %"@x_key")
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
+  %lookup_elem = call i8* inttoptr (i64 1 to i8* (%bpf_map*, i8*)*)(%bpf_map* %bpf_map_ptr, i64* nonnull %"@x_key")
   %map_lookup_cond = icmp eq i8* %lookup_elem, null
   br i1 %map_lookup_cond, label %lookup_merge, label %lookup_success
 
@@ -70,7 +73,8 @@ lookup_merge:                                     ; preds = %log2.exit, %lookup_
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %28)
   store i64 %lookup_elem_val.0, i64* %"@x_val", align 8
   %pseudo1 = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %update_elem = call i64 inttoptr (i64 2 to i64 (i8*, i8*, i8*, i64)*)(i64 %pseudo1, i64* nonnull %"@x_key", i64* nonnull %"@x_val", i64 0)
+  %bpf_map_ptr2 = inttoptr i64 %pseudo1 to %bpf_map*
+  %update_elem = call i64 inttoptr (i64 2 to i64 (%bpf_map*, i8*, i8*, i64)*)(%bpf_map* %bpf_map_ptr2, i64* nonnull %"@x_key", i64* nonnull %"@x_val", i64 0)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %26)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %28)
   ret i64 0

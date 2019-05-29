@@ -7,7 +7,9 @@ namespace codegen {
 TEST(codegen, struct_string_ptr)
 {
 #if LLVM_VERSION_MAJOR > 6
-  auto expected = R"EXPECTED(; Function Attrs: nounwind
+  auto expected = R"EXPECTED(%bpf_map = type opaque
+
+; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
 
 ; Function Attrs: argmemonly nounwind
@@ -39,7 +41,8 @@ entry:
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %6)
   store i64 0, i64* %"@mystr_key", align 8
   %pseudo = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %update_elem = call i64 inttoptr (i64 2 to i64 (i8*, i8*, i8*, i64)*)(i64 %pseudo, i64* nonnull %"@mystr_key", [64 x i8]* nonnull %str, i64 0)
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
+  %update_elem = call i64 inttoptr (i64 2 to i64 (%bpf_map*, i8*, i8*, i64)*)(%bpf_map* %bpf_map_ptr, i64* nonnull %"@mystr_key", [64 x i8]* nonnull %str, i64 0)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %6)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %3)
   ret i64 0
@@ -55,7 +58,9 @@ attributes #0 = { nounwind }
 attributes #1 = { argmemonly nounwind }
 )EXPECTED";
 #else
-  auto expected = R"EXPECTED(; Function Attrs: nounwind
+  auto expected = R"EXPECTED(%bpf_map = type opaque
+
+; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
 
 ; Function Attrs: argmemonly nounwind
@@ -87,7 +92,8 @@ entry:
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %6)
   store i64 0, i64* %"@mystr_key", align 8
   %pseudo = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %update_elem = call i64 inttoptr (i64 2 to i64 (i8*, i8*, i8*, i64)*)(i64 %pseudo, i64* nonnull %"@mystr_key", [64 x i8]* nonnull %str, i64 0)
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
+  %update_elem = call i64 inttoptr (i64 2 to i64 (%bpf_map*, i8*, i8*, i64)*)(%bpf_map* %bpf_map_ptr, i64* nonnull %"@mystr_key", [64 x i8]* nonnull %str, i64 0)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %6)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %3)
   ret i64 0
@@ -113,7 +119,9 @@ attributes #1 = { argmemonly nounwind }
        expected);
 
 #if LLVM_VERSION_MAJOR > 6
-  expected = R"EXPECTED(; Function Attrs: nounwind
+  expected = R"EXPECTED(%bpf_map = type opaque
+
+; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
 
 ; Function Attrs: argmemonly nounwind
@@ -137,7 +145,8 @@ entry:
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %4)
   store i64 0, i64* %"@mystr_key", align 8
   %pseudo = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %update_elem = call i64 inttoptr (i64 2 to i64 (i8*, i8*, i8*, i64)*)(i64 %pseudo, i64* nonnull %"@mystr_key", [64 x i8]* nonnull %str, i64 0)
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
+  %update_elem = call i64 inttoptr (i64 2 to i64 (%bpf_map*, i8*, i8*, i64)*)(%bpf_map* %bpf_map_ptr, i64* nonnull %"@mystr_key", [64 x i8]* nonnull %str, i64 0)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %4)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %1)
   ret i64 0
@@ -153,7 +162,9 @@ attributes #0 = { nounwind }
 attributes #1 = { argmemonly nounwind }
 )EXPECTED";
 #else
-  expected = R"EXPECTED(; Function Attrs: nounwind
+  expected = R"EXPECTED(%bpf_map = type opaque
+
+; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
 
 ; Function Attrs: argmemonly nounwind
@@ -177,7 +188,8 @@ entry:
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %4)
   store i64 0, i64* %"@mystr_key", align 8
   %pseudo = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %update_elem = call i64 inttoptr (i64 2 to i64 (i8*, i8*, i8*, i64)*)(i64 %pseudo, i64* nonnull %"@mystr_key", [64 x i8]* nonnull %str, i64 0)
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
+  %update_elem = call i64 inttoptr (i64 2 to i64 (%bpf_map*, i8*, i8*, i64)*)(%bpf_map* %bpf_map_ptr, i64* nonnull %"@mystr_key", [64 x i8]* nonnull %str, i64 0)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %4)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %1)
   ret i64 0

@@ -9,7 +9,9 @@ TEST(codegen, string_not_equal_comparison)
   test("kretprobe:vfs_read /comm != \"sshd\"/ { @[comm] = count(); }",
 
 #if LLVM_VERSION_MAJOR > 6
-R"EXPECTED(; Function Attrs: nounwind
+R"EXPECTED(%bpf_map = type opaque
+
+; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
 
 ; Function Attrs: argmemonly nounwind
@@ -48,7 +50,8 @@ pred_true:                                        ; preds = %strcmp.loop9, %strc
   %get_comm18 = call i64 inttoptr (i64 16 to i64 (i8*, i64)*)([16 x i8]* nonnull %comm17, i64 16)
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* nonnull align 1 %3, i8* nonnull align 1 %4, i64 16, i1 false)
   %pseudo = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %lookup_elem = call i8* inttoptr (i64 1 to i8* (i8*, i8*)*)(i64 %pseudo, [16 x i8]* nonnull %"@_key")
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
+  %lookup_elem = call i8* inttoptr (i64 1 to i8* (%bpf_map*, i8*)*)(%bpf_map* %bpf_map_ptr, [16 x i8]* nonnull %"@_key")
   %map_lookup_cond = icmp eq i8* %lookup_elem, null
   br i1 %map_lookup_cond, label %lookup_merge, label %lookup_success
 
@@ -95,7 +98,8 @@ lookup_merge:                                     ; preds = %pred_true, %lookup_
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %14)
   store i64 %lookup_elem_val.0, i64* %"@_val", align 8
   %pseudo19 = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %update_elem = call i64 inttoptr (i64 2 to i64 (i8*, i8*, i8*, i64)*)(i64 %pseudo19, [16 x i8]* nonnull %"@_key", i64* nonnull %"@_val", i64 0)
+  %bpf_map_ptr20 = inttoptr i64 %pseudo19 to %bpf_map*
+  %update_elem = call i64 inttoptr (i64 2 to i64 (%bpf_map*, i8*, i8*, i64)*)(%bpf_map* %bpf_map_ptr20, [16 x i8]* nonnull %"@_key", i64* nonnull %"@_val", i64 0)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %3)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %14)
   ret i64 0
@@ -114,7 +118,9 @@ attributes #0 = { nounwind }
 attributes #1 = { argmemonly nounwind }
 )EXPECTED");
 #else
-R"EXPECTED(; Function Attrs: nounwind
+R"EXPECTED(%bpf_map = type opaque
+
+; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
 
 ; Function Attrs: argmemonly nounwind
@@ -153,7 +159,8 @@ pred_true:                                        ; preds = %strcmp.loop9, %strc
   %get_comm18 = call i64 inttoptr (i64 16 to i64 (i8*, i64)*)([16 x i8]* nonnull %comm17, i64 16)
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* nonnull %3, i8* nonnull %4, i64 16, i32 1, i1 false)
   %pseudo = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %lookup_elem = call i8* inttoptr (i64 1 to i8* (i8*, i8*)*)(i64 %pseudo, [16 x i8]* nonnull %"@_key")
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
+  %lookup_elem = call i8* inttoptr (i64 1 to i8* (%bpf_map*, i8*)*)(%bpf_map* %bpf_map_ptr, [16 x i8]* nonnull %"@_key")
   %map_lookup_cond = icmp eq i8* %lookup_elem, null
   br i1 %map_lookup_cond, label %lookup_merge, label %lookup_success
 
@@ -200,7 +207,8 @@ lookup_merge:                                     ; preds = %pred_true, %lookup_
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %14)
   store i64 %lookup_elem_val.0, i64* %"@_val", align 8
   %pseudo19 = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %update_elem = call i64 inttoptr (i64 2 to i64 (i8*, i8*, i8*, i64)*)(i64 %pseudo19, [16 x i8]* nonnull %"@_key", i64* nonnull %"@_val", i64 0)
+  %bpf_map_ptr20 = inttoptr i64 %pseudo19 to %bpf_map*
+  %update_elem = call i64 inttoptr (i64 2 to i64 (%bpf_map*, i8*, i8*, i64)*)(%bpf_map* %bpf_map_ptr20, [16 x i8]* nonnull %"@_key", i64* nonnull %"@_val", i64 0)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %3)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %14)
   ret i64 0

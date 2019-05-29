@@ -10,6 +10,7 @@ TEST(codegen, if_else_printf)
 
 R"EXPECTED(%printf_t.0 = type { i64 }
 %printf_t = type { i64 }
+%bpf_map = type opaque
 
 ; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
@@ -31,8 +32,9 @@ if_stmt:                                          ; preds = %entry
   %3 = getelementptr inbounds %printf_t, %printf_t* %printf_args, i64 0, i32 0
   store i64 0, i64* %3, align 8
   %pseudo = tail call i64 @llvm.bpf.pseudo(i64 1, i64 1)
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
   %get_cpu_id = tail call i64 inttoptr (i64 8 to i64 ()*)()
-  %perf_event_output = call i64 inttoptr (i64 25 to i64 (i8*, i64, i64, %printf_t*, i64)*)(i8* %0, i64 %pseudo, i64 %get_cpu_id, %printf_t* nonnull %printf_args, i64 8)
+  %perf_event_output = call i64 inttoptr (i64 25 to i64 (i8*, %bpf_map*, i64, %printf_t*, i64)*)(i8* %0, %bpf_map* %bpf_map_ptr, i64 %get_cpu_id, %printf_t* nonnull %printf_args, i64 8)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %2)
   br label %done
 
@@ -42,8 +44,9 @@ else_stmt:                                        ; preds = %entry
   %5 = getelementptr inbounds %printf_t.0, %printf_t.0* %printf_args1, i64 0, i32 0
   store i64 1, i64* %5, align 8
   %pseudo2 = tail call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %get_cpu_id3 = tail call i64 inttoptr (i64 8 to i64 ()*)()
-  %perf_event_output4 = call i64 inttoptr (i64 25 to i64 (i8*, i64, i64, %printf_t.0*, i64)*)(i8* %0, i64 %pseudo2, i64 %get_cpu_id3, %printf_t.0* nonnull %printf_args1, i64 8)
+  %bpf_map_ptr3 = inttoptr i64 %pseudo2 to %bpf_map*
+  %get_cpu_id4 = tail call i64 inttoptr (i64 8 to i64 ()*)()
+  %perf_event_output5 = call i64 inttoptr (i64 25 to i64 (i8*, %bpf_map*, i64, %printf_t.0*, i64)*)(i8* %0, %bpf_map* %bpf_map_ptr3, i64 %get_cpu_id4, %printf_t.0* nonnull %printf_args1, i64 8)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %4)
   br label %done
 

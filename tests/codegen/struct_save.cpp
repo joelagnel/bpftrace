@@ -6,7 +6,9 @@ namespace codegen {
 
 TEST(codegen, struct_save)
 {
-  auto expected = R"EXPECTED(; Function Attrs: nounwind
+  auto expected = R"EXPECTED(%bpf_map = type opaque
+
+; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
 
 ; Function Attrs: argmemonly nounwind
@@ -23,7 +25,8 @@ entry:
   call void @llvm.lifetime.start.p0i8(i64 -1, i8* nonnull %2)
   %probe_read = call i64 inttoptr (i64 4 to i64 (i8*, i64, i8*)*)([12 x i8]* nonnull %"@foo_val", i64 12, i64 0)
   %pseudo = call i64 @llvm.bpf.pseudo(i64 1, i64 1)
-  %update_elem = call i64 inttoptr (i64 2 to i64 (i8*, i8*, i8*, i64)*)(i64 %pseudo, i64* nonnull %"@foo_key", [12 x i8]* nonnull %"@foo_val", i64 0)
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
+  %update_elem = call i64 inttoptr (i64 2 to i64 (%bpf_map*, i8*, i8*, i64)*)(%bpf_map* %bpf_map_ptr, i64* nonnull %"@foo_key", [12 x i8]* nonnull %"@foo_val", i64 0)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %1)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %2)
   ret i64 0

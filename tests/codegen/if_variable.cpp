@@ -10,6 +10,7 @@ TEST(codegen, if_variable)
 
 #if LLVM_VERSION_MAJOR < 6
 R"EXPECTED(%printf_t = type { i64, i64 }
+%bpf_map = type opaque
 
 ; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
@@ -30,8 +31,9 @@ entry:
   store i64 0, i64* %4, align 8
   store i64 %., i64* %3, align 8
   %pseudo = tail call i64 @llvm.bpf.pseudo(i64 1, i64 1)
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
   %get_cpu_id = tail call i64 inttoptr (i64 8 to i64 ()*)()
-  %perf_event_output = call i64 inttoptr (i64 25 to i64 (i8*, i64, i64, %printf_t*, i64)*)(i8* %0, i64 %pseudo, i64 %get_cpu_id, %printf_t* nonnull %printf_args, i64 16)
+  %perf_event_output = call i64 inttoptr (i64 25 to i64 (i8*, %bpf_map*, i64, %printf_t*, i64)*)(i8* %0, %bpf_map* %bpf_map_ptr, i64 %get_cpu_id, %printf_t* nonnull %printf_args, i64 16)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %2)
   ret i64 0
 }
@@ -44,6 +46,7 @@ attributes #1 = { argmemonly nounwind }
 )EXPECTED");
 #else
 R"EXPECTED(%printf_t = type { i64, i64 }
+%bpf_map = type opaque
 
 ; Function Attrs: nounwind
 declare i64 @llvm.bpf.pseudo(i64, i64) #0
@@ -64,8 +67,9 @@ entry:
   store i64 0, i64* %4, align 8
   store i64 %spec.select, i64* %3, align 8
   %pseudo = tail call i64 @llvm.bpf.pseudo(i64 1, i64 1)
+  %bpf_map_ptr = inttoptr i64 %pseudo to %bpf_map*
   %get_cpu_id = tail call i64 inttoptr (i64 8 to i64 ()*)()
-  %perf_event_output = call i64 inttoptr (i64 25 to i64 (i8*, i64, i64, %printf_t*, i64)*)(i8* %0, i64 %pseudo, i64 %get_cpu_id, %printf_t* nonnull %printf_args, i64 16)
+  %perf_event_output = call i64 inttoptr (i64 25 to i64 (i8*, %bpf_map*, i64, %printf_t*, i64)*)(i8* %0, %bpf_map* %bpf_map_ptr, i64 %get_cpu_id, %printf_t* nonnull %printf_args, i64 16)
   call void @llvm.lifetime.end.p0i8(i64 -1, i8* nonnull %2)
   ret i64 0
 }
